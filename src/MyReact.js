@@ -1,7 +1,7 @@
 let globalId = 0;
 let globalParent;
 
-// global state for all hooks
+// global state for all hooks for each component
 const componentState = new Map();
 
 export function useState(initialState) {
@@ -20,10 +20,12 @@ export function useState(initialState) {
 
     const setSate = (state) => {
       const { props, component } = componentState.get(parent);
+
+      // useState can accept function or value
       if (typeof state === "function") {
         cache[id].value = state(cache[id].value);
       } else {
-        cache[id].valye = state;
+        cache[id].value = state;
       }
 
       render(component, props, parent);
@@ -90,11 +92,13 @@ export function useMemo(callback, dependencies) {
 }
 
 export function render(component, props, parent) {
+  // hooks use the state of the component from cache
   const state = componentState.get(parent) || { cache: [] };
   componentState.set(parent, { ...state, component, props });
   globalParent = parent;
 
   const output = component(props);
+  // reset to 0 after rendering in completed
   globalId = 0;
   parent.textContent = output;
 }
